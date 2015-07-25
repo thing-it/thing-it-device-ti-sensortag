@@ -41,6 +41,12 @@ module.exports = {
         sensorTypes: [],
         services: [],
         configuration: [{
+            id: "uuid",
+            label: "UUID",
+            type: {
+                id: "string"
+            }
+        }, {
             id: "barometricPressureEnabled",
             label: "Barometric Pressure Enabled",
             type: {
