@@ -47,73 +47,79 @@
             <tr ng-show="component.configuration.ambientTemperatureEnabled">
                 <td><label>Ambient Temperature</label></td>
                 <td></td>
-                <td style="text-align: right;">{{formatDecimal(component._state.ambientTemperature)}}</td>
+                <td style="text-align: right;">{{component._state.ambientTemperature | number}}</td>
                 <td>&#8451;</td>
             </tr>
             <tr ng-show="component.configuration.irTemperatureEnabled">
                 <td><label>IR Temperature</label></td>
                 <td></td>
-                <td style="text-align: right;">{{formatDecimal(component._state.ambientTemperature)}}</td>
+                <td style="text-align: right;">{{component._state.ambientTemperature | number}}</td>
                 <td>&#8451;</td>
             </tr>
             <tr ng-show="component.configuration.accelerometerEnabled">
                 <td rowspan="3"><label>Acceleration</label></td>
                 <td><label>X</label></td>
-                <td style="text-align: right;">{{formatDecimal(component._state.acceleration.x)}}</td>
+                <td style="text-align: right;">{{component._state.acceleration.x | number}}</td>
                 <td>G</td>
             </tr>
             <tr ng-show="component.configuration.accelerometerEnabled" style="vertical-align: middle !important;">
                 <td><label>Y</label></td>
-                <td style="text-align: right;">{{formatDecimal(component._state.acceleration.y)}}</td>
+                <td style="text-align: right;">{{component._state.acceleration.y | number}}</td>
                 <td>G</td>
             </tr>
             <tr ng-show="component.configuration.accelerometerEnabled" style="vertical-align: middle !important;">
                 <td><label>Z</label></td>
-                <td style="text-align: right;">{{formatDecimal(component._state.acceleration.z)}}</td>
+                <td style="text-align: right;">{{component._state.acceleration.z | number}}</td>
                 <td>G</td>
             </tr>
             <tr ng-show="component.configuration.magnetometerEnabled">
                 <td rowspan="3"><label>Magnetic Field Strength</label></td>
                 <td><label>X</label></td>
-                <td style="text-align: right;">{{formatDecimal(component._state.magneticFieldStrength.x)}}</td>
+                <td style="text-align: right;">{{component._state.magneticFieldStrength.x | number}}</td>
                 <td>&mu;T</td>
             </tr>
             <tr ng-show="component.configuration.magnetometerEnabled">
                 <td><label>Y</label></td>
-                <td style="text-align: right;">{{formatDecimal(component._state.magneticFieldStrength.y)}}</td>
+                <td style="text-align: right;">{{component._state.magneticFieldStrength.y | number}}</td>
                 <td>&mu;T</td>
             </tr>
             <tr ng-show="component.configuration.magnetometerEnabled">
                 <td><label>Z</label></td>
-                <td style="text-align: right;">{{formatDecimal(component._state.magneticFieldStrength.z)}}</td>
+                <td style="text-align: right;">{{component._state.magneticFieldStrength.z | number}}</td>
                 <td>&mu;T</td>
             </tr>
             <tr ng-show="component.configuration.humidityEnabled">
                 <td><label>Humidity</label></td>
                 <td></td>
-                <td style="text-align: right;">{{formatDecimal(component._state.humidity)}}</td>
+                <td style="text-align: right;">{{component._state.humidity | number}}</td>
+                <td>%rH</td>
+            </tr>
+            <tr ng-show="component.configuration.luxometerEnabled">
+                <td><label>Light Intensity</label></td>
+                <td></td>
+                <td style="text-align: right;">{{component._state.luminousIntensity | number}}</td>
                 <td>%rH</td>
             </tr>
             <tr ng-show="component.configuration.barometricPressureEnabled">
                 <td><label>Barometric Pressure</label></td>
                 <td></td>
-                <td style="text-align: right;">{{formatDecimal(component._state.barometricPressure)}}</td>
+                <td style="text-align: right;">{{component._state.barometricPressure | number}}</td>
                 <td>mbar</td>
             </tr>
             <tr ng-show="component.configuration.gyroscopeEnabled">
                 <td rowspan="3"><label>Gyroscopic Propulsion</label></td>
                 <td><label>X</label></td>
-                <td style="text-align: right;">{{formatDecimal(component._state.gyroscopicPropulsion.x)}}</td>
+                <td style="text-align: right;">{{component._state.gyroscopicPropulsion.x | number}}</td>
                 <td>&deg;/s</td>
             </tr>
             <tr ng-show="component.configuration.gyroscopeEnabled">
                 <td><label>Y</label></td>
-                <td style="text-align: right;">{{formatDecimal(component._state.gyroscopicPropulsion.y)}}</td>
+                <td style="text-align: right;">{{component._state.gyroscopicPropulsion.y | number}}</td>
                 <td>&deg;/s</td>
             </tr>
             <tr ng-show="component.configuration.gyroscopeEnabled">
                 <td><label>Z</label></td>
-                <td style="text-align: right;">{{component._state.gyroscopicPropulsion.z}}</td>
+                <td style="text-align: right;">{{component._state.gyroscopicPropulsion.z | number}}</td>
                 <td>&deg;/s</td>
             </tr>
         </table>
