@@ -1,26 +1,38 @@
 module.exports = {
     metadata: {
-        family: "tiSensorTag2",
-        plugin: "tiSensorTag2",
-        label: "Texas Instruments (C) SensorTag/CC2650 SensorTag",
+        family: "tiSensorTag",
+        plugin: "tiSensorTag",
+        label: "Texas Instruments (C) CC2540/CC2650 SensorTag",
         manufacturer: "Texas Instruments",
         tangible: true,
         discoverable: true,
         state: [{
             id: "humidity",
-            label: "Humidity",
+            label: "Humidity (%)",
             type: {
                 id: "number"
             }
         }, {
-            id: "temperature",
-            label: "Temperature",
+            id: "ambientTemperature",
+            label: "Ambient Temperature (°C)",
+            type: {
+                id: "number"
+            }
+        }, {
+            id: "objectTemperature",
+            label: "Object Temperature (°C)",
             type: {
                 id: "number"
             }
         }, {
             id: "barometricPressure",
-            label: "Barometric Pressure",
+            label: "Barometric Pressure (mBar)",
+            type: {
+                id: "number"
+            }
+        }, {
+            id: "luminousIntensity",
+            label: "Luminous Intensity (Lux)",
             type: {
                 id: "number"
             }
@@ -77,6 +89,27 @@ module.exports = {
                 id: "boolean"
             },
             defaultValue: true
+        }, {
+            id: "humidityNotificationInterval",
+            label: "Humidity Notification Interval (ms)",
+            type: {
+                id: "number"
+            },
+            defaultValue: 60000
+        }, {
+            id: "luxometerEnabled",
+            label: "Luxometer Enabled",
+            type: {
+                id: "boolean"
+            },
+            defaultValue: true
+        }, {
+            id: "luxometerNotificationInterval",
+            label: "Luxometer Notification Interval (ms)",
+            type: {
+                id: "number"
+            },
+            defaultValue: 60000
         }]
     },
     create: function (device) {
@@ -91,13 +124,8 @@ module.exports = {
     }
 };
 
-var utils = require("../../utils");
 var q = require('q');
-var noble;
-var SensorTag;
-
-var GUID_PATTERN = /([a-f0-9]{8})-?([a-f0-9]{4})-?([a-f0-9]{4})-?([a-f0-9]{4})-?([a-f0-9]{12})/;
-var GUID_REPLACEMENT = "$1-$2-$3-$4-$5";
+var SensorTag = require("sensortag");
 
 function TISensorTagDiscovery() {
     /**
@@ -107,32 +135,9 @@ function TISensorTagDiscovery() {
     TISensorTagDiscovery.prototype.start = function () {
         if (this.node.isSimulated()) {
         } else {
-            if (!noble)
-            {
-                noble = require('noble');
-            }
+            SensorTag.discover(function (sensorTag) {
 
-            noble.on('discover', function (peripheral) {
-                if (peripheral.advertisement.localName &&
-                    peripheral.advertisement.localName.indexOf('SensorTag') === 0) {
-
-                    console.log("Found Sensor Tag " + peripheral.advertisement.localName);
-                    console.log("\tUUID " + peripheral.uuid);
-
-                    if (peripheral.uuid) {
-                        console.log("GUID " + peripheral.uuid.replace(GUID_PATTERN, GUID_REPLACEMENT));
-                    }
-
-                    var sensorTag = new TISensorTag();
-
-                    sensorTag.peripheral = peripheral;
-                    sensorTag.uuid = peripheral.uuid;
-
-                    this.advertiseDevice(sensorTag);
-                }
-            }.bind(this));
-
-            noble.startScanning();
+            });
         }
     };
 
@@ -141,7 +146,6 @@ function TISensorTagDiscovery() {
      * @param options
      */
     TISensorTagDiscovery.prototype.stop = function () {
-        noble.stopScanning();
     };
 }
 
@@ -162,7 +166,8 @@ function TISensorTag() {
             humidity: null,
             irTemperature: null,
             ambientTemperature: 23,
-            magneticFieldStrength: {x: null, y: null, z: null}
+            magneticFieldStrength: {x: null, y: null, z: null},
+            ambientLight: 1500
         };
 
         if (this.peripheral) {
@@ -172,53 +177,39 @@ function TISensorTag() {
         }
         else {
             if (!this.isSimulated()) {
-                if (!noble)
-                {
-                    noble = require('noble');
+                if (!SensorTag) {
+                    SensorTag = require("sensortag");
                 }
 
-                if (!SensorTag)
-                {
-                    SensorTag = require("ti-sensortag");
-                }
-
-                noble.on('discover', function (peripheral) {
-                    if (peripheral.advertisement.localName &&
-                        peripheral.advertisement.localName.indexOf('SensorTag') === 0 &&
-                        peripheral.uuid === this.uuid) {
-                        console.log("\tFound configured Sensor Tag " + peripheral.advertisement.localName);
-                        console.log("\tUUID " + peripheral.uuid);
-
-                        if (peripheral.uuid) {
-                            console.log("\tGUID " + peripheral.uuid.replace(GUID_PATTERN, GUID_REPLACEMENT));
-                        }
-
-                        this.peripheral = peripheral;
-
-                        noble.stopScanning();
-
-                        this.connect();
-                    }
-                }.bind(this));
-
-                noble.startScanning();
-
-                console.log("\tScanning started");
+                this.scan();
 
                 deferred.resolve();
             } else {
                 setInterval(function () {
                     this.state = {
-                        acceleration: {x: Math.floor((Math.random() * 10)), y: Math.floor((Math.random() * 10)), z: Math.floor((Math.random() * 10))},
+                        acceleration: {
+                            x: Math.floor((Math.random() * 10)),
+                            y: Math.floor((Math.random() * 10)),
+                            z: Math.floor((Math.random() * 10))
+                        },
                         barometricPressure: 1000 + Math.floor((Math.random() * 200)),
-                        gyroscopicPropulsion: {x: Math.floor((Math.random() * 50)), y: Math.floor((Math.random() * 50)), z: Math.floor((Math.random() * 50))},
+                        gyroscopicPropulsion: {
+                            x: Math.floor((Math.random() * 50)),
+                            y: Math.floor((Math.random() * 50)),
+                            z: Math.floor((Math.random() * 50))
+                        },
                         humidity: 60 + Math.floor((Math.random() * 10)),
                         irTemperature: 20 + Math.floor((Math.random() * 10)),
                         ambientTemperature: 20 + Math.floor((Math.random() * 10)),
-                        magneticFieldStrength: {x: Math.floor((Math.random() * 10)), y: Math.floor((Math.random() * 10)), z: Math.floor((Math.random() * 10))}
+                        magneticFieldStrength: {
+                            x: Math.floor((Math.random() * 10)),
+                            y: Math.floor((Math.random() * 10)),
+                            z: Math.floor((Math.random() * 10))
+                        },
+                        ambientLight: 1500 + Math.floor((Math.random() * 10))
                     };
 
-                    this.publishSensorTagStateChange();
+                    this.publishStateChange();
                 }.bind(this), 1000);
 
                 deferred.resolve();
@@ -231,140 +222,171 @@ function TISensorTag() {
     /**
      *
      */
+    TISensorTag.prototype.scan = function () {
+        console.log("\tScanning started");
+
+        SensorTag.discover(function (sensorTag) {
+            console.log('discovered: ' + sensorTag);
+
+            if (sensorTag.uuid === this.uuid) {
+                console.log("Matching Tag found.");
+
+                this.sensorTag = sensorTag;
+
+                this.sensorTag.on('disconnect', function () {
+                    console.log('disconnected!');
+                    this.scan();
+                }.bind(this));
+
+                this.connect();
+            }
+        }.bind(this));
+    };
+
+    /**
+     *
+     */
     TISensorTag.prototype.connect = function () {
-        this.peripheral.connect(function (error) {
-            if (error) {
-                console.log(error);
-            } else {
-                this.sensor = new SensorTag(new SensorTag.NobleConnector(this.peripheral));
+        this.sensorTag.connectAndSetUp(function () {
+            console.log('connectAndSetUp');
 
-                this.sensor.discover(function () {
-                    // Accelaration
+            this.sensorTag.readDeviceName(function (error, deviceName) {
+                console.log('\tdevice name = ' + deviceName);
+            }.bind(this));
+            this.sensorTag.readManufacturerName(function (error, manufacturerName) {
+                console.log('\tmanufacturer name = ' + manufacturerName);
+            }.bind(this));
+            this.sensorTag.readSystemId(function (error, systemId) {
+                console.log('\tsystem ID = ' + systemId);
+            }.bind(this));
+            this.sensorTag.readSerialNumber(function (error, serialNumber) {
+                console.log('\tserial number = ' + serialNumber);
+            }.bind(this));
 
-                    if (this.configuration.accelerometerEnabled) {
-                        this.lastAcceleration = {x: 0, y: 0, z: 0};
+            // Temperatures
 
-                        this.sensor.Accelerometer.addListener(function (data) {
-                            this.state.acceleration = this.sensor.Accelerometer.calculateAcceleration(data);
+            this.sensorTag.readIrTemperature(function (error, objectTemperature, ambientTemperature) {
+                console.log('\tobject temperature = %d °C', objectTemperature.toFixed(1));
+                console.log('\tambient temperature = %d °C', ambientTemperature.toFixed(1));
+            });
 
-                            if (this.vectorDeviation(this.state.acceleration, this.lastAcceleration) > 0.02) {
-                                this.publishSensorTagStateChange();
-                            }
+            this.sensorTag.enableIrTemperature(function () {
+                this.sensorTag.on('irTemperatureChange', function (objectTemperature, ambientTemperature) {
+                    this.state.objectTemperatur = objectTemperature.toFixed(1);
+                    this.state.ambientTemperatur = ambientTemperature.toFixed(1);
+                    this.publishStateChange();
+                }.bind(this));
+            }.bind(this));
 
-                            this.lastAcceleration = this.state.acceleration;
-                        }.bind(this));
+            // Accelerometer
 
-                        this.sensor.Accelerometer.setPeriod(100);
-                        this.sensor.Accelerometer.enableNotification();
-                        this.sensor.Accelerometer.enable();
-                    }
-
-                    if (this.configuration.humidityEnabled) {
-                        // Humidity
-
-                        this.sensor.Humidity.addListener(function (data) {
-                            var humidity = this.sensor.Humidity.calculateHumidity(data);
-
-                            this.state.humidity = humidity;
-
-                            this.publishSensorTagStateChange();
-                        }.bind(this));
-
-                        // this.sensor.Humidity.setPeriod(60000);
-                        this.sensor.Humidity.enableNotification();
-                        this.sensor.Humidity.enable();
-                    }
-
-                    // IR Temperature
-
-                    if (this.configuration.irTemperatureEnabled) {
-                        /*
-                         this.sensor.IRTemperature.addListener(function (data) {
-                         var temperature = this.sensor.IRTemperature.calculateAmbientTemperature(data, 0);
-
-                         this.state.ambientTemperature = temperature;
-
-                         this.publishStateChange();
-                         }.bind(this));
-
-                         //this.sensor.IRTemperature.setPeriod(15000);
-                         this.sensor.IRTemperature.enableNotification();
-                         this.sensor.IRTemperature.enable();
-                         */
-                    }
-
-                    // Barometric Pressure
-
-                    if (this.configuration.barometricPressureEnabled) {
-                        this.sensor.BarometricPressure.addListener(function (data) {
-                            this.state.barometricPressure = this.sensor.BarometricPressure.calculatePressure(data);
-
-                            this.publishSensorTagStateChange();
-                        }.bind(this));
-
-                        //this.sensor.BarometricPressure.setPeriod(60000);
-                        this.sensor.BarometricPressure.enableNotification();
-                        this.sensor.BarometricPressure.enable();
-                    }
-
-                    // Magnetometer
-
-                    if (this.configuration.magnetometerEnabled) {
-                        this.lastMagneticFieldStrength = {x: 0, y: 0, z: 0};
-
-                        this.sensor.Magnetometer.addListener(function (data) {
-                            this.state.magneticFieldStrength = this.sensor.Magnetometer.calculateCoordinates(data);
-
-                            if (this.vectorDeviation(this.state.magneticFieldStrength, this.lastMagneticFieldStrength) > 0.02) {
-                                this.publishSensorTagStateChange();
-                            }
-
-                            this.lastMagneticFieldStrength = this.state.magneticFieldStrength;
-                        }.bind(this));
-
-                        this.sensor.Magnetometer.setPeriod(100);
-                        this.sensor.Magnetometer.enableNotification();
-                        this.sensor.Magnetometer.enable();
-                    }
-
-                    // Gyroscope
-
-                    if (this.configuration.gyroscopeEnabled) {
-                        this.lastGyroscopicPropulsion = {x: 0, y: 0, z: 0};
-
-                        this.sensor.Gyroscope.addListener(function (data) {
-                            this.state.gyroscopicPropulsion = this.sensor.Gyroscope.calculateAxisValue(data);
-
-                            if (this.vectorDeviation(this.state.gyroscopicPropulsion, this.lastGyroscopicPropulsion) > 0.02) {
-                                this.publishSensorTagStateChange();
-                            }
-
-                            this.lastGyroscopicPropulsion = this.state.gyroscopicPropulsion;
-                        }.bind(this));
-                    }
-
-                    // Simple Key
-
-                    this.sensor.SimpleKey.addListener(function (data) {
-                        var events = {
-                            RIGHT: 0x01,
-                            LEFT: 0x02,
-                            BOTH: 0x04
-                        }
-                        if (data[0] === 1) {
-                            this.publishEvent("right");
-                        }
-                        else if (data[0] === 2) {
-                            this.publishEvent("left");
-                        }
-                        else if (data[0] === 3) {
-                            this.publishEvent("both");
-                        }
-                    }.bind(this));
-
-                    this.sensor.SimpleKey.enableNotification();
+            if (this.configuration.accelerometerEnabled) {
+                console.log("Check for Accelerometer")
+                this.sensorTag.enableAccelerometer(function () {
+                    console.log("Accelerometer enabled")
+                    this.sensorTag.on("accelerometerChange", function (x, y, z) {
+                        this.state.acceleration.x = x.toFixed(1);
+                        this.state.acceleration.y = y.toFixed(1);
+                        this.state.acceleration.z = z.toFixed(1);
+                        this.publishStateChange();
+                    }.bind(this))
                 }.bind(this));
             }
+
+            // Gyroscope
+
+            if (this.configuration.gyroscopeEnabled) {
+                console.log("Check for Gyroscope")
+                this.sensorTag.enableGyroscope(function () {
+                    console.log("Gyroscope enabled")
+                    this.sensorTag.on("gyroscopeChange", function (x, y, z) {
+                        this.state.gyroscopicPropulsion.x = x.toFixed(1);
+                        this.state.gyroscopicPropulsion.y = y.toFixed(1);
+                        this.state.gyroscopicPropulsion.z = z.toFixed(1);
+                        this.publishStateChange();
+                    }.bind(this))
+                }.bind(this));
+            }
+
+            // Magnetometer
+
+            if (this.configuration.magnetometerEnabled) {
+                console.log("Check for Magnetometer")
+                this.sensorTag.enableMagnetometer(function () {
+                    console.log("Magnetometer enabled")
+                    this.sensorTag.on("magnetometerChange", function (x, y, z) {
+                        this.state.magneticFieldStrength.x = x.toFixed(1);
+                        this.state.magneticFieldStrength.y = y.toFixed(1);
+                        this.state.magneticFieldStrength.z = z.toFixed(1);
+                        this.publishStateChange();
+                    }.bind(this))
+                }.bind(this));
+            }
+
+            // Humidity
+
+            if (this.configuration.humidityEnabled) {
+                this.sensorTag.enableHumidity(function () {
+                    if (this.configuration.humidityNotificationInterval > 0) {
+                        this.sensorTag.setHumidityPeriod(this.configuration.humidityNotificationInterval, function (error) {
+                            this.sensorTag.notifyHumidity(function (error, humidity) {
+                                this.state.humidity = humidity.toFixed(1);
+                                this.publishStateChange();
+                            }.bind(this));
+                        }.bind(this));
+                    }
+
+                    this.sensorTag.on("humidityChange", function (humidity) {
+                        this.state.humidity = humidity.toFixed(1);
+                        this.publishStateChange();
+                    }.bind(this))
+                }.bind(this));
+            }
+
+            // Barometric Pressure
+
+            if (this.configuration.barometricPressureEnabled) {
+                this.sensorTag.enableBarometricPressure(function () {
+                    this.sensorTag.on("barometricChange", function (barometricPressure) {
+                        this.state.barometricPressure = barometricPressure.toFixed(1);
+                        this.publishStateChange();
+                    }.bind(this))
+                }.bind(this));
+            }
+
+            // Luxometer
+
+            if (this.configuration.luxometerEnabled) {
+                this.sensorTag.enableLuxometer(function () {
+                    if (this.configuration.luxometerNotificationInterval > 0) {
+                        this.sensorTag.setLuxometerPeriod(this.configuration.luxometerNotificationInterval, function (error) {
+                            this.sensorTag.notifyLuxometer(function (error, luminousIntensity) {
+                                this.state.luminousIntensity = luminousIntensity.toFixed(1);
+                                this.publishStateChange();
+                            }.bind(this));
+                        }.bind(this));
+                    }
+
+                    this.sensorTag.on("luxometerChange", function (luminousIntensity) {
+                        this.state.luminousIntensity = luminousIntensity.toFixed(1);
+                        this.publishStateChange();
+                    }.bind(this))
+                }.bind(this));
+            }
+
+            // Simple Keys
+
+            this.sensorTag.on("simpleKeyChange", function (left, right) {
+                console.log("Keys", left, right);
+
+                if (left) {
+                    this.publishEvent("left");
+                }
+
+                if (right) {
+                    this.publishEvent("right");
+                }
+            }.bind(this));
         }.bind(this));
     };
 
@@ -383,13 +405,6 @@ function TISensorTag() {
             Math.sqrt(Math.pow(lastValue.x, 2) + Math.pow(lastValue.y, 2) + Math.pow(lastValue.z, 2));
 
         return percentage;
-    };
-
-    /**
-     *
-     */
-    TISensorTag.prototype.publishSensorTagStateChange = function () {
-        this.publishStateChange();
     };
 
     /**
