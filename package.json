@@ -1,6 +1,6 @@
 {
   "name": "thing-it-device-ti-sensortag",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "[thing-it-node] Device Plugin for TI CC2541 and CC2650 SensorTag.",
   "authors": "Marc Gille",
   "keywords": [

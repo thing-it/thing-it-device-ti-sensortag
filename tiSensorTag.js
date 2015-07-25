@@ -93,7 +93,7 @@ module.exports = {
             id: "humidityNotificationInterval",
             label: "Humidity Notification Interval (ms)",
             type: {
-                id: "number"
+                id: "integer"
             },
             defaultValue: 60000
         }, {
@@ -107,7 +107,7 @@ module.exports = {
             id: "luxometerNotificationInterval",
             label: "Luxometer Notification Interval (ms)",
             type: {
-                id: "number"
+                id: "integer"
             },
             defaultValue: 60000
         }]
