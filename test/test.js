@@ -5,8 +5,8 @@ var tiSensorTag = TiSensorTag.create({});
 tiSensorTag.isSimulated = function () {
     return false;
 };
-tiSensorTag.uuid = "3b34d7c7160d429fbe9552d46114e29c";
 tiSensorTag.configuration = {
+    uuid : "3b34d7c7160d429fbe9552d46114e29c",
     irTemperatureEnabled: true,
     ambientTemperatureEnabled: true,
     gyroscopeEnabled: true,

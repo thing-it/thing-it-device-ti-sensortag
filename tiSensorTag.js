@@ -229,7 +229,7 @@ function TISensorTag() {
         console.log("\tScanning started.");
 
         SensorTag.discover(function (sensorTag) {
-            if (sensorTag.uuid === this.uuid) {
+            if (sensorTag.uuid === this.configuration.uuid) {
                 console.log("\nMatching Tag found.");
 
                 this.sensorTag = sensorTag;
