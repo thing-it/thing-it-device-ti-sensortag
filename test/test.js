@@ -13,9 +13,10 @@ tiSensorTag.configuration = {
     accelerometerEnabled: true,
     magnetometerEnabled: true,
     humidityEnabled: true,
-    humidityNotificationInterval: 20000,
+    humidityNotificationInterval: 0,
     barometricPressureEnabled: true,
-    luxometerEnabled: false
+    barometricPressureNotificationInterval: 20000,
+    luxometerEnabled: true
 };
 tiSensorTag.publishEvent = function(event, data){
     console.log("Event", event);

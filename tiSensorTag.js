@@ -136,7 +136,10 @@ function TISensorTagDiscovery() {
         if (this.node.isSimulated()) {
         } else {
             SensorTag.discover(function (sensorTag) {
+                var tiSensorTag = new TISensorTag();
 
+                tiSensorTag.sensorTag = sensorTag;
+                tiSensorTag.uuid = sensorTag.uuid;
             });
         }
     };
@@ -165,12 +168,12 @@ function TISensorTag() {
             gyroscopicPropulsion: {x: null, y: null, z: null},
             humidity: null,
             irTemperature: null,
-            ambientTemperature: 23,
+            ambientTemperature: null,
             magneticFieldStrength: {x: null, y: null, z: null},
-            ambientLight: 1500
+            luminousIntensity: null
         };
 
-        if (this.peripheral) {
+        if (this.sensorTag) {
             this.connect();
 
             deferred.resolve();
@@ -206,7 +209,7 @@ function TISensorTag() {
                             y: Math.floor((Math.random() * 10)),
                             z: Math.floor((Math.random() * 10))
                         },
-                        ambientLight: 1500 + Math.floor((Math.random() * 10))
+                        luminousIntensity: 1500 + Math.floor((Math.random() * 10))
                     };
 
                     this.publishStateChange();
@@ -223,18 +226,16 @@ function TISensorTag() {
      *
      */
     TISensorTag.prototype.scan = function () {
-        console.log("\tScanning started");
+        console.log("\tScanning started.");
 
         SensorTag.discover(function (sensorTag) {
-            console.log('discovered: ' + sensorTag);
-
             if (sensorTag.uuid === this.uuid) {
-                console.log("Matching Tag found.");
+                console.log("\nMatching Tag found.");
 
                 this.sensorTag = sensorTag;
 
                 this.sensorTag.on('disconnect', function () {
-                    console.log('disconnected!');
+                    console.log('\nDisconnected.');
                     this.scan();
                 }.bind(this));
 
@@ -248,8 +249,6 @@ function TISensorTag() {
      */
     TISensorTag.prototype.connect = function () {
         this.sensorTag.connectAndSetUp(function () {
-            console.log('connectAndSetUp');
-
             this.sensorTag.readDeviceName(function (error, deviceName) {
                 console.log('\tdevice name = ' + deviceName);
             }.bind(this));
@@ -265,15 +264,11 @@ function TISensorTag() {
 
             // Temperatures
 
-            this.sensorTag.readIrTemperature(function (error, objectTemperature, ambientTemperature) {
-                console.log('\tobject temperature = %d °C', objectTemperature.toFixed(1));
-                console.log('\tambient temperature = %d °C', ambientTemperature.toFixed(1));
-            });
-
             this.sensorTag.enableIrTemperature(function () {
                 this.sensorTag.on('irTemperatureChange', function (objectTemperature, ambientTemperature) {
                     this.state.objectTemperatur = objectTemperature.toFixed(1);
                     this.state.ambientTemperatur = ambientTemperature.toFixed(1);
+
                     this.publishStateChange();
                 }.bind(this));
             }.bind(this));
@@ -281,13 +276,12 @@ function TISensorTag() {
             // Accelerometer
 
             if (this.configuration.accelerometerEnabled) {
-                console.log("Check for Accelerometer")
                 this.sensorTag.enableAccelerometer(function () {
-                    console.log("Accelerometer enabled")
                     this.sensorTag.on("accelerometerChange", function (x, y, z) {
                         this.state.acceleration.x = x.toFixed(1);
                         this.state.acceleration.y = y.toFixed(1);
                         this.state.acceleration.z = z.toFixed(1);
+
                         this.publishStateChange();
                     }.bind(this))
                 }.bind(this));
@@ -296,13 +290,12 @@ function TISensorTag() {
             // Gyroscope
 
             if (this.configuration.gyroscopeEnabled) {
-                console.log("Check for Gyroscope")
                 this.sensorTag.enableGyroscope(function () {
-                    console.log("Gyroscope enabled")
                     this.sensorTag.on("gyroscopeChange", function (x, y, z) {
                         this.state.gyroscopicPropulsion.x = x.toFixed(1);
                         this.state.gyroscopicPropulsion.y = y.toFixed(1);
                         this.state.gyroscopicPropulsion.z = z.toFixed(1);
+
                         this.publishStateChange();
                     }.bind(this))
                 }.bind(this));
@@ -311,13 +304,12 @@ function TISensorTag() {
             // Magnetometer
 
             if (this.configuration.magnetometerEnabled) {
-                console.log("Check for Magnetometer")
                 this.sensorTag.enableMagnetometer(function () {
-                    console.log("Magnetometer enabled")
                     this.sensorTag.on("magnetometerChange", function (x, y, z) {
                         this.state.magneticFieldStrength.x = x.toFixed(1);
                         this.state.magneticFieldStrength.y = y.toFixed(1);
                         this.state.magneticFieldStrength.z = z.toFixed(1);
+
                         this.publishStateChange();
                     }.bind(this))
                 }.bind(this));
@@ -330,8 +322,10 @@ function TISensorTag() {
                     if (this.configuration.humidityNotificationInterval > 0) {
                         this.sensorTag.setHumidityPeriod(this.configuration.humidityNotificationInterval, function (error) {
                             this.sensorTag.notifyHumidity(function (error, humidity) {
-                                this.state.humidity = humidity.toFixed(1);
-                                this.publishStateChange();
+                                if (humidity) {
+                                    this.state.humidity = humidity.toFixed(1);
+                                    this.publishStateChange();
+                                }
                             }.bind(this));
                         }.bind(this));
                     }
@@ -347,6 +341,17 @@ function TISensorTag() {
 
             if (this.configuration.barometricPressureEnabled) {
                 this.sensorTag.enableBarometricPressure(function () {
+                    if (this.configuration.barometricPressureNotificationInterval > 0) {
+                        this.sensorTag.setBarometricPressurePeriod(this.configuration.barometricPressureNotificationInterval, function (error) {
+                            this.sensorTag.notifyBarometricPressure(function (error, barometricPressure) {
+                                if (barometricPressure) {
+                                    this.state.barometricPressure = barometricPressure.toFixed(1);
+
+                                    this.publishStateChange();
+                                }
+                            }.bind(this));
+                        }.bind(this));
+                    }
                     this.sensorTag.on("barometricChange", function (barometricPressure) {
                         this.state.barometricPressure = barometricPressure.toFixed(1);
                         this.publishStateChange();
@@ -356,7 +361,7 @@ function TISensorTag() {
 
             // Luxometer
 
-            if (this.configuration.luxometerEnabled) {
+            if (this.sensorTag.type != "cc2540" && this.configuration.luxometerEnabled) {
                 this.sensorTag.enableLuxometer(function () {
                     if (this.configuration.luxometerNotificationInterval > 0) {
                         this.sensorTag.setLuxometerPeriod(this.configuration.luxometerNotificationInterval, function (error) {
