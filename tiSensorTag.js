@@ -232,7 +232,7 @@ function TISensorTag() {
      *
      */
     TISensorTag.prototype.scan = function () {
-        console.log("\tScanning started.");
+        console.log("\tScanning for Sensor Tag " + this.configuration.uuid + " started.");
 
         SensorTag.discover(function (sensorTag) {
             if (sensorTag.uuid === this.configuration.uuid) {
