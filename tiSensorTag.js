@@ -450,7 +450,10 @@ function TISensorTag() {
                         }.bind(this));
                     }
                     this.sensorTag.on("barometricChange", function (barometricPressure) {
-                        this.state.barometricPressure = barometricPressure.toFixed(1);
+                        if (barometricPressure) {
+                            this.state.barometricPressure = barometricPressure.toFixed(1);
+                        }
+
                         this.publishStateChange();
                     }.bind(this))
                 }.bind(this));
