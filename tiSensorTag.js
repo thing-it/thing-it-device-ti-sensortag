@@ -269,8 +269,10 @@ function TISensorTag() {
         console.log("\tScanning for Sensor Tag " + this.configuration.uuid + " started.");
 
         SensorTag.discover(function (sensorTag) {
+            console.log("\nSensor Tag " + sensorTag.uuid + " found.");
+
             if (sensorTag.uuid === this.configuration.uuid) {
-                console.log("\nMatching Tag found.");
+                console.log("\nMatching Sensor Tag found.");
 
                 this.sensorTag = sensorTag;
 
@@ -289,18 +291,18 @@ function TISensorTag() {
      */
     TISensorTag.prototype.connect = function () {
         this.sensorTag.connectAndSetUp(function () {
-            this.sensorTag.readDeviceName(function (error, deviceName) {
-                console.log('\tdevice name = ' + deviceName);
-            }.bind(this));
-            this.sensorTag.readManufacturerName(function (error, manufacturerName) {
-                console.log('\tmanufacturer name = ' + manufacturerName);
-            }.bind(this));
-            this.sensorTag.readSystemId(function (error, systemId) {
-                console.log('\tsystem ID = ' + systemId);
-            }.bind(this));
-            this.sensorTag.readSerialNumber(function (error, serialNumber) {
-                console.log('\tserial number = ' + serialNumber);
-            }.bind(this));
+            //this.sensorTag.readDeviceName(function (error, deviceName) {
+            //    console.log('\tdevice name = ' + deviceName);
+            //}.bind(this));
+            //this.sensorTag.readManufacturerName(function (error, manufacturerName) {
+            //    console.log('\tmanufacturer name = ' + manufacturerName);
+            //}.bind(this));
+            //this.sensorTag.readSystemId(function (error, systemId) {
+            //    console.log('\tsystem ID = ' + systemId);
+            //}.bind(this));
+            //this.sensorTag.readSerialNumber(function (error, serialNumber) {
+            //    console.log('\tserial number = ' + serialNumber);
+            //}.bind(this));
 
             // Temperatures
 
