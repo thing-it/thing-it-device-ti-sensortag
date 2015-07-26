@@ -291,18 +291,18 @@ function TISensorTag() {
      */
     TISensorTag.prototype.connect = function () {
         this.sensorTag.connectAndSetUp(function () {
-                //this.sensorTag.readDeviceName(function (error, deviceName) {
-                //    console.log('\tdevice name = ' + deviceName);
-                //}.bind(this));
-                //this.sensorTag.readManufacturerName(function (error, manufacturerName) {
-                //    console.log('\tmanufacturer name = ' + manufacturerName);
-                //}.bind(this));
-                //this.sensorTag.readSystemId(function (error, systemId) {
-                //    console.log('\tsystem ID = ' + systemId);
-                //}.bind(this));
-                //this.sensorTag.readSerialNumber(function (error, serialNumber) {
-                //    console.log('\tserial number = ' + serialNumber);
-                //}.bind(this));
+                this.sensorTag.readDeviceName(function (error, deviceName) {
+                    console.log('\tdevice name = ' + deviceName);
+                }.bind(this));
+                this.sensorTag.readManufacturerName(function (error, manufacturerName) {
+                    console.log('\tmanufacturer name = ' + manufacturerName);
+                }.bind(this));
+                this.sensorTag.readSystemId(function (error, systemId) {
+                    console.log('\tsystem ID = ' + systemId);
+                }.bind(this));
+                this.sensorTag.readSerialNumber(function (error, serialNumber) {
+                    console.log('\tserial number = ' + serialNumber);
+                }.bind(this));
 
                 // Temperatures
 
@@ -335,13 +335,19 @@ function TISensorTag() {
                         if (this.configuration.accelerometerNotificationInterval > 0) {
                             this.sensorTag.setAccelerometerPeriod(this.configuration.accelerometerNotificationInterval, function (error) {
                                 this.sensorTag.notifyAccelerometer(function (error, x, y, z) {
-                                    if (irTemperature) {
+                                    if (x) {
                                         this.state.acceleration.x = x.toFixed(1);
-                                        this.state.acceleration.y = y.toFixed(1);
-                                        this.state.acceleration.z = z.toFixed(1);
-
-                                        this.publishStateChange();
                                     }
+
+                                    if (y) {
+                                        this.state.acceleration.y = y.toFixed(1);
+                                    }
+
+                                    if (z) {
+                                        this.state.acceleration.z = z.toFixed(1);
+                                    }
+
+                                    this.publishStateChange();
                                 }.bind(this));
                             }.bind(this));
                         }
@@ -363,13 +369,19 @@ function TISensorTag() {
                         if (this.configuration.gyroscopeNotificationInterval > 0) {
                             this.sensorTag.setGyroscopePeriod(this.configuration.gyroscopeNotificationInterval, function (error) {
                                 this.sensorTag.notifyGyroscope(function (error, x, y, z) {
-                                    if (irTemperature) {
+                                    if (x) {
                                         this.state.gyroscopicPropulsion.x = x.toFixed(1);
-                                        this.state.gyroscopicPropulsion.y = y.toFixed(1);
-                                        this.state.gyroscopicPropulsion.z = z.toFixed(1);
-
-                                        this.publishStateChange();
                                     }
+
+                                    if (y) {
+                                        this.state.gyroscopicPropulsion.y = y.toFixed(1);
+                                    }
+
+                                    if (z) {
+                                        this.state.gyroscopicPropulsion.z = z.toFixed(1);
+                                    }
+
+                                    this.publishStateChange();
                                 }.bind(this));
                             }.bind(this));
                         }
