@@ -463,14 +463,20 @@ function TISensorTag() {
                     if (this.configuration.luxometerNotificationInterval > 0) {
                         this.sensorTag.setLuxometerPeriod(this.configuration.luxometerNotificationInterval, function (error) {
                             this.sensorTag.notifyLuxometer(function (error, luminousIntensity) {
-                                this.state.luminousIntensity = luminousIntensity.toFixed(1);
+                                if (luminousIntensity) {
+                                    this.state.luminousIntensity = luminousIntensity.toFixed(1);
+                                }
+
                                 this.publishStateChange();
                             }.bind(this));
                         }.bind(this));
                     }
 
                     this.sensorTag.on("luxometerChange", function (luminousIntensity) {
-                        this.state.luminousIntensity = luminousIntensity.toFixed(1);
+                        if (luminousIntensity) {
+                            this.state.luminousIntensity = luminousIntensity.toFixed(1);
+                        }
+
                         this.publishStateChange();
                     }.bind(this))
                 }.bind(this));
