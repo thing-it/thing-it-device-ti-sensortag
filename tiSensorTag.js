@@ -19,8 +19,8 @@ module.exports = {
                 id: "number"
             }
         }, {
-            id: "objectTemperature",
-            label: "Object Temperature (°C)",
+            id: "irTemperature",
+            label: "IR Temperature (°C)",
             type: {
                 id: "number"
             }
@@ -41,6 +41,12 @@ module.exports = {
         sensorTypes: [],
         services: [],
         configuration: [{
+            id: "simulated",
+            label: "Simulated",
+            type: {
+                id: "boolean"
+            }
+        }, {
             id: "uuid",
             label: "UUID",
             type: {
@@ -61,6 +67,13 @@ module.exports = {
             },
             defaultValue: true
         }, {
+            id: "irTemperatureNotificationIntervalNotificationInterval",
+            label: "IR Temperature Notification Interval (ms)",
+            type: {
+                id: "integer"
+            },
+            defaultValue: 300
+        }, {
             id: "ambientTemperatureEnabled",
             label: "Ambient Temperature Enabled",
             type: {
@@ -75,6 +88,13 @@ module.exports = {
             },
             defaultValue: true
         }, {
+            id: "accelerometerNotificationInterval",
+            label: "Accelerometer Notification Interval (ms)",
+            type: {
+                id: "integer"
+            },
+            defaultValue: 2000
+        }, {
             id: "gyroscopeEnabled",
             label: "Gyroscope Enabled",
             type: {
@@ -82,12 +102,26 @@ module.exports = {
             },
             defaultValue: true
         }, {
+            id: "gyroscopeNotificationInterval",
+            label: "Gyroscope Notification Interval (ms)",
+            type: {
+                id: "integer"
+            },
+            defaultValue: 2000
+        }, {
             id: "magnetometerEnabled",
             label: "Magnetometer Enabled",
             type: {
                 id: "boolean"
             },
             defaultValue: true
+        }, {
+            id: "magnetometerNotificationInterval",
+            label: "Magnetometer Notification Interval (ms)",
+            type: {
+                id: "integer"
+            },
+            defaultValue: 2000
         }, {
             id: "humidityEnabled",
             label: "Humidity Enabled",
@@ -270,19 +304,46 @@ function TISensorTag() {
 
             // Temperatures
 
-            this.sensorTag.enableIrTemperature(function () {
-                this.sensorTag.on('irTemperatureChange', function (objectTemperature, ambientTemperature) {
-                    this.state.objectTemperatur = objectTemperature.toFixed(1);
-                    this.state.ambientTemperatur = ambientTemperature.toFixed(1);
+            if (this.configuration.irTemperatureEnabled) {
+                this.sensorTag.enableIrTemperature(function () {
+                    if (this.configuration.irTemperatureNotificationInterval > 0) {
+                        this.sensorTag.setIrTemperaturePeriod(this.configuration.irTemperatureNotificationInterval, function (error) {
+                            this.sensorTag.notifyIrTemperature(function (error, irTemperature) {
+                                if (irTemperature) {
+                                    this.state.irTemperature = irTemperature.toFixed(1);
+                                    this.publishStateChange();
+                                }
+                            }.bind(this));
+                        }.bind(this));
+                    }
 
-                    this.publishStateChange();
+                    this.sensorTag.on('irTemperatureChange', function (objectTemperature, ambientTemperature) {
+                        this.state.objectTemperatur = objectTemperature.toFixed(1);
+                        this.state.ambientTemperatur = ambientTemperature.toFixed(1);
+
+                        this.publishStateChange();
+                    }.bind(this));
                 }.bind(this));
-            }.bind(this));
+            }
 
             // Accelerometer
 
             if (this.configuration.accelerometerEnabled) {
                 this.sensorTag.enableAccelerometer(function () {
+                    if (this.configuration.accelerometerNotificationInterval > 0) {
+                        this.sensorTag.setAccelerometerPeriod(this.configuration.accelerometerNotificationInterval, function (error) {
+                            this.sensorTag.notifyAccelerometer(function (error, x, y, z) {
+                                if (irTemperature) {
+                                    this.state.acceleration.x = x.toFixed(1);
+                                    this.state.acceleration.y = y.toFixed(1);
+                                    this.state.acceleration.z = z.toFixed(1);
+
+                                    this.publishStateChange();
+                                }
+                            }.bind(this));
+                        }.bind(this));
+                    }
+
                     this.sensorTag.on("accelerometerChange", function (x, y, z) {
                         this.state.acceleration.x = x.toFixed(1);
                         this.state.acceleration.y = y.toFixed(1);
@@ -297,6 +358,20 @@ function TISensorTag() {
 
             if (this.configuration.gyroscopeEnabled) {
                 this.sensorTag.enableGyroscope(function () {
+                    if (this.configuration.gyroscopeNotificationInterval > 0) {
+                        this.sensorTag.setGyroscopePeriod(this.configuration.gyroscopeNotificationInterval, function (error) {
+                            this.sensorTag.notifyGyroscope(function (error, x, y, z) {
+                                if (irTemperature) {
+                                    this.state.gyroscopicPropulsion.x = x.toFixed(1);
+                                    this.state.gyroscopicPropulsion.y = y.toFixed(1);
+                                    this.state.gyroscopicPropulsion.z = z.toFixed(1);
+
+                                    this.publishStateChange();
+                                }
+                            }.bind(this));
+                        }.bind(this));
+                    }
+
                     this.sensorTag.on("gyroscopeChange", function (x, y, z) {
                         this.state.gyroscopicPropulsion.x = x.toFixed(1);
                         this.state.gyroscopicPropulsion.y = y.toFixed(1);
@@ -311,6 +386,20 @@ function TISensorTag() {
 
             if (this.configuration.magnetometerEnabled) {
                 this.sensorTag.enableMagnetometer(function () {
+                    if (this.configuration.magnetometerNotificationInterval > 0) {
+                        this.sensorTag.setMagnetometerPeriod(this.configuration.magnetometerNotificationInterval, function (error) {
+                            this.sensorTag.notifyMagnetometer(function (error, x, y, z) {
+                                if (irTemperature) {
+                                    this.state.magneticFieldStrength.x = x.toFixed(1);
+                                    this.state.magneticFieldStrength.y = y.toFixed(1);
+                                    this.state.magneticFieldStrength.z = z.toFixed(1);
+
+                                    this.publishStateChange();
+                                }
+                            }.bind(this));
+                        }.bind(this));
+                    }
+
                     this.sensorTag.on("magnetometerChange", function (x, y, z) {
                         this.state.magneticFieldStrength.x = x.toFixed(1);
                         this.state.magneticFieldStrength.y = y.toFixed(1);
