@@ -179,7 +179,7 @@ module.exports = {
 };
 
 var q = require('q');
-var SensorTag = require("sensortag");
+var SensorTag;
 
 function TISensorTagDiscovery() {
     /**

@@ -25,4 +25,6 @@ tiSensorTag.publishStateChange = function(){
     console.log("State Change", this.getState());
 };
 
+console.log("About to start");
+
 tiSensorTag.start();
