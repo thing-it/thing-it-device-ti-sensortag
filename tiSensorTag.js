@@ -60,6 +60,13 @@ module.exports = {
             },
             defaultValue: true
         }, {
+            id: "barometricPressureNotificationInterval",
+            label: "Barometric Pressure Temperature Notification Interval (ms)",
+            type: {
+                id: "integer"
+            },
+            defaultValue: 300
+        }, {
             id: "irTemperatureEnabled",
             label: "IR Temperature Enabled",
             type: {
@@ -80,6 +87,13 @@ module.exports = {
                 id: "boolean"
             },
             defaultValue: true
+        }, {
+            id: "ambientTemperatureNotificationInterval",
+            label: "Ambient Temperature Notification Interval (ms)",
+            type: {
+                id: "integer"
+            },
+            defaultValue: 300
         }, {
             id: "accelerometerEnabled",
             label: "Accelerometer Enabled",
@@ -228,7 +242,7 @@ function TISensorTag() {
 
                 deferred.resolve();
             } else {
-                setInterval(function () {
+                this.simulationInterval = setInterval(function () {
                     this.state = {
                         acceleration: {
                             x: Math.floor((Math.random() * 10)),
@@ -260,6 +274,26 @@ function TISensorTag() {
         }
 
         return deferred.promise;
+    };
+
+
+    /**
+     *
+     */
+    TISensorTag.prototype.stop = function () {
+        if (!this.isSimulated()) {
+            if (this.sensorTag) {
+                console.log("Disconnect TI SensorTag.");
+
+                this.sensorTag.disconnect();
+            }
+        } else {
+            console.log("Stop simulating TI SensorTag.");
+
+            if (this.simulationInterval) {
+                clearInterval(this.simulationInterval);
+            }
+        }
     };
 
     /**
@@ -313,6 +347,28 @@ function TISensorTag() {
                                 this.sensorTag.notifyIrTemperature(function (error, irTemperature) {
                                     if (irTemperature) {
                                         this.state.irTemperature = irTemperature.toFixed(1);
+                                        this.publishStateChange();
+                                    }
+                                }.bind(this));
+                            }.bind(this));
+                        }
+
+                        this.sensorTag.on('irTemperatureChange', function (objectTemperature, ambientTemperature) {
+                            this.state.objectTemperatur = objectTemperature.toFixed(1);
+                            this.state.ambientTemperatur = ambientTemperature.toFixed(1);
+
+                            this.publishStateChange();
+                        }.bind(this));
+                    }.bind(this));
+                }
+
+                if (this.configuration.ambientTemperatureEnabled) {
+                    this.sensorTag.enableIrTemperature(function () {
+                        if (this.configuration.ambientTemperatureNotificationInterval > 0) {
+                            this.sensorTag.setIrTemperaturePeriod(this.configuration.ambientTemperatureNotificationInterval, function (error) {
+                                this.sensorTag.notifyIrTemperature(function (error, irTemperature, ambientTemperature) {
+                                    if (ambientTemperature) {
+                                        this.state.ambientTemperature = ambientTemperature.toFixed(1);
                                         this.publishStateChange();
                                     }
                                 }.bind(this));
