@@ -249,7 +249,7 @@ function TISensorTag() {
                             y: Math.floor((Math.random() * 10)),
                             z: Math.floor((Math.random() * 10))
                         },
-                        luminousIntensity: 1500 + Math.floor((Math.random() * 10))
+                        luminousIntensity: 1500 + Math.floor((Math.random() * 100))
                     };
 
                     this.publishStateChange();
