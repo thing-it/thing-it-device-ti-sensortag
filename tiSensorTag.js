@@ -10,31 +10,31 @@ module.exports = {
             id: "humidity",
             label: "Humidity (%)",
             type: {
-                id: "number"
+                id: "decimal"
             }
         }, {
             id: "ambientTemperature",
             label: "Ambient Temperature (°C)",
             type: {
-                id: "number"
+                id: "decimal"
             }
         }, {
             id: "irTemperature",
             label: "IR Temperature (°C)",
             type: {
-                id: "number"
+                id: "decimal"
             }
         }, {
             id: "barometricPressure",
             label: "Barometric Pressure (mBar)",
             type: {
-                id: "number"
+                id: "decimal"
             }
         }, {
             id: "luminousIntensity",
             label: "Luminous Intensity (Lux)",
             type: {
-                id: "number"
+                id: "decimal"
             }
         }],
         actorTypes: [],
