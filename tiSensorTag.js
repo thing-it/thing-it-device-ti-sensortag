@@ -234,11 +234,13 @@ function TISensorTag() {
         }
         else {
             if (!this.isSimulated()) {
+                this.started = true;
+
                 if (!SensorTag) {
                     SensorTag = require("sensortag");
-                }
 
-                this.scan();
+                    this.scan();
+                }
 
                 deferred.resolve();
             } else {
@@ -282,6 +284,8 @@ function TISensorTag() {
      */
     TISensorTag.prototype.stop = function () {
         if (!this.isSimulated()) {
+            this.started = false;
+
             if (this.sensorTag) {
                 console.log("Disconnect TI SensorTag.");
 
@@ -303,6 +307,13 @@ function TISensorTag() {
         console.log("\tScanning for Sensor Tag " + this.configuration.uuid + " started.");
 
         SensorTag.discover(function (sensorTag) {
+            if (!this.started)
+            {
+                console.log("Skipping discovered SensorTag - Device stopped.");
+
+                return;
+            }
+
             console.log("\nSensor Tag " + sensorTag.uuid + " found.");
 
             if (sensorTag.uuid === this.configuration.uuid) {
