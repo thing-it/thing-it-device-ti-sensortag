@@ -507,7 +507,7 @@ function TISensorTag() {
                     this.sensorTag.enableHumidity(function () {
                         if (this.configuration.humidityNotificationInterval > 0) {
                             this.sensorTag.setHumidityPeriod(this.configuration.humidityNotificationInterval, function (error) {
-                                this.sensorTag.notifyHumidity(function (error, humidity) {
+                                this.sensorTag.notifyHumidity(function (error, temperature, humidity) {
                                     if (humidity) {
                                         this.state.humidity = humidity.toFixed(1);
                                         this.publishStateChange();
@@ -516,7 +516,7 @@ function TISensorTag() {
                             }.bind(this));
                         }
 
-                        this.sensorTag.on("humidityChange", function (humidity) {
+                        this.sensorTag.on("humidityChange", function (temperature, humidity) {
                             this.state.humidity = humidity.toFixed(1);
                             this.publishStateChange();
                         }.bind(this))
