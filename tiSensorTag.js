@@ -369,8 +369,8 @@ function TISensorTag() {
                         }
 
                         this.sensorTag.on('irTemperatureChange', function (objectTemperature, ambientTemperature) {
-                            this.state.objectTemperatur = objectTemperature.toFixed(1);
-                            this.state.ambientTemperatur = ambientTemperature.toFixed(1);
+                            this.state.irTemperature = objectTemperature.toFixed(1);
+                            this.state.ambientTemperature = ambientTemperature.toFixed(1);
 
                             this.publishStateChange();
                         }.bind(this));
@@ -391,8 +391,8 @@ function TISensorTag() {
                         }
 
                         this.sensorTag.on('irTemperatureChange', function (objectTemperature, ambientTemperature) {
-                            this.state.objectTemperatur = objectTemperature.toFixed(1);
-                            this.state.ambientTemperatur = ambientTemperature.toFixed(1);
+                            this.state.irTemperature = objectTemperature.toFixed(1);
+                            this.state.ambientTemperature = ambientTemperature.toFixed(1);
 
                             this.publishStateChange();
                         }.bind(this));
