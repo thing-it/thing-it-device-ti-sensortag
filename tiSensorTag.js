@@ -189,6 +189,10 @@ function TISensorTagDiscovery() {
     TISensorTagDiscovery.prototype.start = function () {
         if (this.node.isSimulated()) {
         } else {
+            if (!SensorTag) {
+                SensorTag = require("sensortag");
+            }
+
             SensorTag.discover(function (sensorTag) {
                 var tiSensorTag = new TISensorTag();
 
