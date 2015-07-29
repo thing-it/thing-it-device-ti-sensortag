@@ -5,6 +5,8 @@
 
 [thing-it-node] Device Plugin for [TI SensorTag CC2541](http://www.ti.com/tool/cc2541dk-sensor) and [TI CC2650 SensorTag](http://www.ti.com/tool/cc2650stk)
 
+<img src="./documentation/images/ti-sensortag.png">
+
 This allows you to 
 
 * obtain sensor values and events for all SensorTag sensors,
