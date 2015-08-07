@@ -40,6 +40,10 @@ module.exports = {
         actorTypes: [],
         sensorTypes: [],
         services: [],
+        events: [{id: "leftClick", label: "Left Click"}, {id: "rightClick", label: "Right Click"}, {
+            id: "bothClick",
+            label: "Both Click"
+        }],
         configuration: [{
             id: "simulated",
             label: "Simulated",
@@ -311,8 +315,7 @@ function TISensorTag() {
         console.log("\tScanning for Sensor Tag " + this.configuration.uuid + " started.");
 
         SensorTag.discover(function (sensorTag) {
-            if (!this.started)
-            {
+            if (!this.started) {
                 console.log("Skipping discovered SensorTag - Device stopped.");
 
                 return;
