@@ -78,7 +78,7 @@ module.exports = {
             },
             defaultValue: true
         }, {
-            id: "irTemperatureNotificationIntervalNotificationInterval",
+            id: "irTemperatureNotificationInterval",
             label: "IR Temperature Notification Interval (ms)",
             type: {
                 id: "integer"
@@ -184,6 +184,7 @@ module.exports = {
 
 var q = require('q');
 var SensorTag;
+var defaultDelay = 2000;
 
 function TISensorTagDiscovery() {
     /**
@@ -357,228 +358,281 @@ function TISensorTag() {
                 }.bind(this));
 
                 // Temperatures
-
-                if (this.configuration.irTemperatureEnabled) {
-                    this.sensorTag.enableIrTemperature(function () {
-                        if (this.configuration.irTemperatureNotificationInterval > 0) {
-                            this.sensorTag.setIrTemperaturePeriod(this.configuration.irTemperatureNotificationInterval, function (error) {
-                                this.sensorTag.notifyIrTemperature(function (error, irTemperature) {
-                                    if (irTemperature) {
-                                        this.state.irTemperature = irTemperature.toFixed(1);
-                                        this.publishStateChange();
-                                    }
-                                }.bind(this));
-                            }.bind(this));
-                        }
+                if (this.configuration.irTemperatureEnabled || this.configuration.ambientTemperatureEnabled) {
+                    this.sensorTag.enableIrTemperature(function (error) {
+                        this.logDebug("Enabled temperature notifications.");
 
                         this.sensorTag.on('irTemperatureChange', function (objectTemperature, ambientTemperature) {
-                            this.state.irTemperature = objectTemperature.toFixed(1);
-                            this.state.ambientTemperature = ambientTemperature.toFixed(1);
+                            this.logDebug("Temperature change:", objectTemperature, ambientTemperature);
+
+                            if (objectTemperature && this.configuration.irTemperatureEnabled) {
+                                this.state.irTemperature = objectTemperature.toFixed(1);
+                            }
+
+                            if (ambientTemperature && this.configuration.ambientTemperatureEnabled) {
+                                this.state.ambientTemperature = ambientTemperature.toFixed(1);
+                            }
 
                             this.publishStateChange();
                         }.bind(this));
-                    }.bind(this));
-                }
 
-                if (this.configuration.ambientTemperatureEnabled) {
-                    this.sensorTag.enableIrTemperature(function () {
-                        if (this.configuration.ambientTemperatureNotificationInterval > 0) {
-                            this.sensorTag.setIrTemperaturePeriod(this.configuration.ambientTemperatureNotificationInterval, function (error) {
-                                this.sensorTag.notifyIrTemperature(function (error, irTemperature, ambientTemperature) {
-                                    if (ambientTemperature) {
-                                        this.state.ambientTemperature = ambientTemperature.toFixed(1);
-                                        this.publishStateChange();
-                                    }
-                                }.bind(this));
-                            }.bind(this));
-                        }
+                        var temperatureInterval = Math.max(this.configuration.irTemperatureNotificationInterval,
+                            this.configuration.ambientTemperatureNotificationInterval);
+                        temperatureInterval = (temperatureInterval > 0 ? temperatureInterval : defaultDelay);
 
-                        this.sensorTag.on('irTemperatureChange', function (objectTemperature, ambientTemperature) {
-                            this.state.irTemperature = objectTemperature.toFixed(1);
-                            this.state.ambientTemperature = ambientTemperature.toFixed(1);
-
-                            this.publishStateChange();
+                        this.sensorTag.setIrTemperaturePeriod(temperatureInterval, function (error) {
+                            this.sensorTag.notifyIrTemperature(function (error) {
+                            });
                         }.bind(this));
                     }.bind(this));
                 }
+                else {
+                    this.sensorTag.disableIrTemperature(function (error) {
+                        this.logDebug("Disabled temperature notifications.");
+                    }.bind(this));
+                }
+
 
                 // Accelerometer
-
                 if (this.configuration.accelerometerEnabled) {
                     this.sensorTag.enableAccelerometer(function () {
-                        if (this.configuration.accelerometerNotificationInterval > 0) {
-                            this.sensorTag.setAccelerometerPeriod(this.configuration.accelerometerNotificationInterval, function (error) {
-                                this.sensorTag.notifyAccelerometer(function (error, x, y, z) {
-                                    if (x) {
-                                        this.state.acceleration.x = x.toFixed(1);
-                                    }
-
-                                    if (y) {
-                                        this.state.acceleration.y = y.toFixed(1);
-                                    }
-
-                                    if (z) {
-                                        this.state.acceleration.z = z.toFixed(1);
-                                    }
-
-                                    this.publishStateChange();
-                                }.bind(this));
-                            }.bind(this));
-                        }
+                        this.logDebug("Enabled accelerometer notifications.");
 
                         this.sensorTag.on("accelerometerChange", function (x, y, z) {
-                            this.state.acceleration.x = x.toFixed(1);
-                            this.state.acceleration.y = y.toFixed(1);
-                            this.state.acceleration.z = z.toFixed(1);
+                            this.logDebug("Accelerometer change:", x, y, z);
+
+                            if (x) {
+                                this.state.acceleration.x = x.toFixed(1);
+                            }
+
+                            if (y) {
+                                this.state.acceleration.y = y.toFixed(1);
+                            }
+
+                            if (z) {
+                                this.state.acceleration.z = z.toFixed(1);
+                            }
 
                             this.publishStateChange();
-                        }.bind(this))
+                        }.bind(this));
+
+                        var accelerometerNotificationInterval;
+
+                        // Values equal or greater than 2500 can lead to failure to set the period
+                        if (this.configuration.accelerometerNotificationInterval > 0 &&
+                            this.configuration.accelerometerNotificationInterval < 2500){
+                            accelerometerNotificationInterval = this.configuration.accelerometerNotificationInterval;
+                        }
+                        else{
+                            accelerometerNotificationInterval = 500;
+                        }
+
+                        this.sensorTag.setAccelerometerPeriod(accelerometerNotificationInterval, function (error) {
+                            this.sensorTag.notifyAccelerometer();
+                        }.bind(this));
+                    }.bind(this));
+                }
+                else {
+                    this.sensorTag.disableAccelerometer(function (error){
+                        this.logDebug("Disabled accelerometer notifications.");
                     }.bind(this));
                 }
 
                 // Gyroscope
-
                 if (this.configuration.gyroscopeEnabled) {
                     this.sensorTag.enableGyroscope(function () {
-                        if (this.configuration.gyroscopeNotificationInterval > 0) {
-                            this.sensorTag.setGyroscopePeriod(this.configuration.gyroscopeNotificationInterval, function (error) {
-                                this.sensorTag.notifyGyroscope(function (error, x, y, z) {
-                                    if (x) {
-                                        this.state.gyroscopicPropulsion.x = x.toFixed(1);
-                                    }
-
-                                    if (y) {
-                                        this.state.gyroscopicPropulsion.y = y.toFixed(1);
-                                    }
-
-                                    if (z) {
-                                        this.state.gyroscopicPropulsion.z = z.toFixed(1);
-                                    }
-
-                                    this.publishStateChange();
-                                }.bind(this));
-                            }.bind(this));
-                        }
+                        this.logDebug("Enabled gyroscope notifications.");
 
                         this.sensorTag.on("gyroscopeChange", function (x, y, z) {
-                            this.state.gyroscopicPropulsion.x = x.toFixed(1);
-                            this.state.gyroscopicPropulsion.y = y.toFixed(1);
-                            this.state.gyroscopicPropulsion.z = z.toFixed(1);
+                            this.logDebug("Gyroscope change:", x, y, z);
+
+                            if (x) {
+                                this.state.gyroscopicPropulsion.x = x.toFixed(1);
+                            }
+
+                            if (y) {
+                                this.state.gyroscopicPropulsion.y = y.toFixed(1);
+                            }
+
+                            if (z) {
+                                this.state.gyroscopicPropulsion.z = z.toFixed(1);
+                            }
 
                             this.publishStateChange();
                         }.bind(this))
+
+                        var gyroscopeNotificationInterval;
+
+                        // Values equal or greater than 2500 can lead to failure to set the period
+                        if (this.configuration.gyroscopeNotificationInterval > 0 &&
+                            this.configuration.gyroscopeNotificationInterval < 2500){
+                            gyroscopeNotificationInterval = this.configuration.gyroscopeNotificationInterval;
+                        }
+                        else{
+                            gyroscopeNotificationInterval = 500;
+                        }
+
+                        this.sensorTag.setGyroscopePeriod(gyroscopeNotificationInterval, function (error) {
+                            this.sensorTag.notifyGyroscope();
+                        }.bind(this));
                     }.bind(this));
                 }
+                else {
+                    this.sensorTag.disableGyroscope(function (error){
+                        this.logDebug("Disabled gyroscope notifications.");
+                    }.bind(this));
+                }
+
 
                 // Magnetometer
-
                 if (this.configuration.magnetometerEnabled) {
                     this.sensorTag.enableMagnetometer(function () {
-                        if (this.configuration.magnetometerNotificationInterval > 0) {
-                            this.sensorTag.setMagnetometerPeriod(this.configuration.magnetometerNotificationInterval, function (error) {
-                                this.sensorTag.notifyMagnetometer(function (error, x, y, z) {
-                                    if (x) {
-                                        this.state.magneticFieldStrength.x = x.toFixed(1);
-                                    }
-
-                                    if (y) {
-                                        this.state.magneticFieldStrength.y = y.toFixed(1);
-                                    }
-
-                                    if (z) {
-                                        this.state.magneticFieldStrength.z = z.toFixed(1);
-                                    }
-
-                                    this.publishStateChange();
-                                }.bind(this));
-                            }.bind(this));
-                        }
+                        this.logDebug("Enabled magnetometer notifications.");
 
                         this.sensorTag.on("magnetometerChange", function (x, y, z) {
-                            this.state.magneticFieldStrength.x = x.toFixed(1);
-                            this.state.magneticFieldStrength.y = y.toFixed(1);
-                            this.state.magneticFieldStrength.z = z.toFixed(1);
+                            this.logDebug("Magnetometer change:", x, y, z);
+
+                            if (x) {
+                                this.state.magneticFieldStrength.x = x.toFixed(1);
+                            }
+
+                            if (y) {
+                                this.state.magneticFieldStrength.y = y.toFixed(1);
+                            }
+
+                            if (z) {
+                                this.state.magneticFieldStrength.z = z.toFixed(1);
+                            }
 
                             this.publishStateChange();
                         }.bind(this))
+
+                        var magnetometerNotificationInterval;
+
+                        // Values equal or greater than 2500 can lead to failure to set the period
+                        if (this.configuration.magnetometerNotificationInterval > 0 &&
+                            this.configuration.magnetometerNotificationInterval < 2500){
+                            magnetometerNotificationInterval = this.configuration.magnetometerNotificationInterval;
+                        }
+                        else{
+                            magnetometerNotificationInterval = 500;
+                        }
+
+                        this.sensorTag.setMagnetometerPeriod(magnetometerNotificationInterval, function (error) {
+                            this.sensorTag.notifyMagnetometer();
+                        }.bind(this));
                     }.bind(this));
                 }
+                else {
+                    this.sensorTag.disableMagnetometer(function (error) {
+                        this.logDebug("Disabled magnetometer notifications.")
+                    }.bind(this));
+                }
+
 
                 // Humidity
-
                 if (this.configuration.humidityEnabled) {
-                    this.sensorTag.enableHumidity(function () {
-                        if (this.configuration.humidityNotificationInterval > 0) {
-                            this.sensorTag.setHumidityPeriod(this.configuration.humidityNotificationInterval, function (error) {
-                                this.sensorTag.notifyHumidity(function (error, temperature, humidity) {
-                                    if (humidity) {
-                                        this.state.humidity = humidity.toFixed(1);
-                                        this.publishStateChange();
-                                    }
-                                }.bind(this));
-                            }.bind(this));
-                        }
+                    this.sensorTag.enableHumidity(function (error) {
+                        this.logDebug("Enabled humidity notifications.");
 
-                        this.sensorTag.on("humidityChange", function (temperature, humidity) {
-                            this.state.humidity = humidity.toFixed(1);
+                        this.sensorTag.on('humidityChange', function (temperature, humidity) {
+                            this.logDebug("Humidity change:", humidity);
+
+                            if (humidity) {
+                                this.state.humidity = humidity.toFixed(1);
+                            }
+
                             this.publishStateChange();
-                        }.bind(this))
+                        }.bind(this));
+
+                        var humidityInterval = (this.configuration.humidityNotificationInterval > 0 ?
+                            this.configuration.humidityNotificationInterval : defaultDelay);
+
+                        this.sensorTag.setHumidityPeriod(humidityInterval, function (error) {
+                            this.sensorTag.notifyHumidity(function (error) {
+                            }.bind(this));
+                        }.bind(this));
+
+
+                        setInterval(function() {
+                            this.sensorTag.readHumidity(function (error, temperature, humidity){
+                                this.logDebug("Humidity read at " + humidity + " and temperature at " + temperature);
+
+                                if (humidity) {
+                                    this.state.humidity = humidity.toFixed(1);
+                                }
+                            }.bind(this));
+                        }.bind(this), humidityInterval);
+                    }.bind(this));
+                }
+                else {
+                    this.sensorTag.disableHumidity(function (error) {
+                        this.logDebug("Disabled humidity notifications.");
                     }.bind(this));
                 }
 
+
                 // Barometric Pressure
-
                 if (this.configuration.barometricPressureEnabled) {
-                    this.sensorTag.enableBarometricPressure(function () {
-                        if (this.configuration.barometricPressureNotificationInterval > 0) {
-                            this.sensorTag.setBarometricPressurePeriod(this.configuration.barometricPressureNotificationInterval, function (error) {
-                                this.sensorTag.notifyBarometricPressure(function (error, barometricPressure) {
-                                    if (barometricPressure) {
-                                        this.state.barometricPressure = barometricPressure.toFixed(1);
+                    this.sensorTag.enableBarometricPressure(function (error) {
+                        this.logDebug("Enabled barometricPressure notifications.");
 
-                                        this.publishStateChange();
-                                    }
-                                }.bind(this));
-                            }.bind(this));
-                        }
-                        this.sensorTag.on("barometricChange", function (barometricPressure) {
+                        this.sensorTag.on('barometricPressureChange', function (barometricPressure) {
+                            this.logDebug("Barometric pressure change:", barometricPressure);
+
                             if (barometricPressure) {
                                 this.state.barometricPressure = barometricPressure.toFixed(1);
                             }
 
                             this.publishStateChange();
-                        }.bind(this))
+                        }.bind(this));
+
+                        var barometricPressureInterval = (this.configuration.barometricPressureNotificationInterval > 0 ?
+                            this.configuration.barometricPressureNotificationInterval : defaultDelay);
+
+                        this.sensorTag.setBarometricPressurePeriod(barometricPressureInterval, function (error) {
+                            this.sensorTag.notifyBarometricPressure(function (error) {
+                            });
+                        }.bind(this));
+                    }.bind(this));
+                }
+                else {
+                    this.sensorTag.disableBarometricPressure(function (error) {
+                        this.logDebug("Disabled barometric pressure notifications.");
                     }.bind(this));
                 }
 
                 // Luxometer
-
                 if (this.sensorTag.type != "cc2540" && this.configuration.luxometerEnabled) {
-                    this.sensorTag.enableLuxometer(function () {
-                        if (this.configuration.luxometerNotificationInterval > 0) {
-                            this.sensorTag.setLuxometerPeriod(this.configuration.luxometerNotificationInterval, function (error) {
-                                this.sensorTag.notifyLuxometer(function (error, luminousIntensity) {
-                                    if (luminousIntensity) {
-                                        this.state.luminousIntensity = luminousIntensity.toFixed(1);
-                                    }
+                    this.sensorTag.enableLuxometer(function (error) {
+                        this.logDebug("Enabled luxometer notifications.");
 
-                                    this.publishStateChange();
-                                }.bind(this));
-                            }.bind(this));
-                        }
+                        this.sensorTag.on('luxometerChange', function (luxometer) {
+                            this.logDebug("Luxometer change:", luxometer);
 
-                        this.sensorTag.on("luxometerChange", function (luminousIntensity) {
-                            if (luminousIntensity) {
-                                this.state.luminousIntensity = luminousIntensity.toFixed(1);
+                            if (luxometer) {
+                                this.state.luminousIntensity = luxometer.toFixed(1);
                             }
 
                             this.publishStateChange();
-                        }.bind(this))
+                        }.bind(this));
+
+                        var luxometerInterval = (this.configuration.luxometerNotificationInterval > 0 ?
+                            this.configuration.luxometerNotificationInterval : defaultDelay);
+
+                        this.sensorTag.setLuxometerPeriod(luxometerInterval, function (error) {
+                            this.sensorTag.notifyLuxometer(function (error) {
+                            });
+                        }.bind(this));
+                    }.bind(this));
+                }
+                else {
+                    this.sensorTag.disableLuxometer(function (error) {
+                        this.logDebug("Disabled luxometer notifications.");
                     }.bind(this));
                 }
 
                 // Simple Keys
-
                 this.sensorTag.on("simpleKeyChange", function (left, right) {
                     console.log("Keys", left, right);
 

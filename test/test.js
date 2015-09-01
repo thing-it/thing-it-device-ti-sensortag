@@ -6,17 +6,24 @@ tiSensorTag.isSimulated = function () {
     return false;
 };
 tiSensorTag.configuration = {
-    uuid : "3b34d7c7160d429fbe9552d46114e29c",
-    irTemperatureEnabled: true,
-    ambientTemperatureEnabled: true,
-    gyroscopeEnabled: true,
-    accelerometerEnabled: true,
-    magnetometerEnabled: true,
+    uuid : "ef111a172b3c4bdeb98b125adb59b30a",
+    irTemperatureEnabled: false,
+    irTemperatureNotificationInterval: 2500,
+    ambientTemperatureEnabled: false,
+    ambientTemperatureNotificationInterval: 2500,
+    gyroscopeEnabled: false,
+    gyroscopeNotificationInterval: 2500,
+    accelerometerEnabled: false,
+    accelerometerNotificationInterval: 2499,
+    magnetometerEnabled: false,
+    magnetometerNotificationInterval: 2490,
     humidityEnabled: true,
-    humidityNotificationInterval: 0,
-    barometricPressureEnabled: true,
-    barometricPressureNotificationInterval: 20000,
-    luxometerEnabled: true
+    humidityNotificationInterval: 2500,
+    barometricPressureEnabled: false,
+    barometricPressureNotificationInterval: 2500,
+    luxometerEnabled: false,
+    luxometerNotificationInterval: 2500
+
 };
 tiSensorTag.publishEvent = function(event, data){
     console.log("Event", event);
@@ -24,6 +31,21 @@ tiSensorTag.publishEvent = function(event, data){
 tiSensorTag.publishStateChange = function(){
     console.log("State Change", this.getState());
 };
+
+tiSensorTag.logInfo = function(){
+    if (arguments.length == 1 ) {
+        console.log(arguments[0]);
+    }
+    else{
+        console.log(arguments);
+    }
+}
+tiSensorTag.logDebug = function(){
+    tiSensorTag.logInfo(arguments);
+}
+tiSensorTag.logError = function(){
+    tiSensorTag.logInfo(arguments);
+}
 
 console.log("About to start");
 
