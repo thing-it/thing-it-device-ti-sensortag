@@ -226,14 +226,14 @@ function TISensorTag() {
         var deferred = q.defer();
 
         this.state = {
-            acceleration: {x: null, y: null, z: null},
+            acceleration: {x: 0, y: 0, z: 0},
             barometricPressure: null,
-            gyroscopicPropulsion: {x: null, y: null, z: null},
-            humidity: null,
-            irTemperature: null,
-            ambientTemperature: null,
-            magneticFieldStrength: {x: null, y: null, z: null},
-            luminousIntensity: null
+            gyroscopicPropulsion: {x: 0, y: 0, z: 0},
+            humidity: 0,
+            irTemperature: -273,
+            ambientTemperature: -273,
+            magneticFieldStrength: {x: 0, y: 0, z: 0},
+            luminousIntensity: 0
         };
 
         if (this.sensorTag) {
@@ -364,13 +364,22 @@ function TISensorTag() {
 
                         this.sensorTag.on('irTemperatureChange', function (objectTemperature, ambientTemperature) {
                             this.logDebug("Temperature change:", objectTemperature, ambientTemperature);
+                            var temperatureRead;
 
                             if (objectTemperature && this.configuration.irTemperatureEnabled) {
-                                this.state.irTemperature = objectTemperature.toFixed(1);
+                                temperatureRead = objectTemperature.toFixed(1);
+
+                                if (temperatureRead){
+                                    this.state.irTemperature = temperatureRead;
+                                }
                             }
 
                             if (ambientTemperature && this.configuration.ambientTemperatureEnabled) {
-                                this.state.ambientTemperature = ambientTemperature.toFixed(1);
+                                temperatureRead = ambientTemperature.toFixed(1);
+
+                                if (temperatureRead){
+                                    this.state.irTemperature = temperatureRead;
+                                }
                             }
 
                             this.publishStateChange();
@@ -611,7 +620,14 @@ function TISensorTag() {
                             this.logDebug("Luxometer change:", luxometer);
 
                             if (luxometer) {
-                                this.state.luminousIntensity = luxometer.toFixed(1);
+                                var luxometerRead = luxometer.toFixed(1);
+
+                                if (luxometerRead){
+                                    this.state.luminousIntensity = luxometerRead;
+                                }
+                                else{
+                                    this.state.luminousIntensity = 0;
+                                }
                             }
 
                             this.publishStateChange();
