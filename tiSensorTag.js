@@ -371,6 +371,10 @@ function TISensorTag() {
 
                                 if (temperatureRead){
                                     this.state.irTemperature = temperatureRead;
+
+                                    if (!this.state.irTemperature){
+                                        this.state.irTemperature = 0;
+                                    }
                                 }
                             }
 
@@ -378,7 +382,11 @@ function TISensorTag() {
                                 temperatureRead = ambientTemperature.toFixed(1);
 
                                 if (temperatureRead){
-                                    this.state.irTemperature = temperatureRead;
+                                    this.state.ambientTemperature = temperatureRead;
+
+                                    if (!this.state.ambientTemperature){
+                                        this.state.ambientTemperature = 0;
+                                    }
                                 }
                             }
 
@@ -412,14 +420,26 @@ function TISensorTag() {
 
                             if (x) {
                                 this.state.acceleration.x = x.toFixed(1);
+
+                                if (!this.state.acceleration.x){
+                                    this.state.acceleration.x = 0;
+                                }
                             }
 
                             if (y) {
                                 this.state.acceleration.y = y.toFixed(1);
+
+                                if (!this.state.acceleration.y){
+                                    this.state.acceleration.y = 0;
+                                }
                             }
 
                             if (z) {
                                 this.state.acceleration.z = z.toFixed(1);
+
+                                if (!this.state.acceleration.z){
+                                    this.state.acceleration.z = 0;
+                                }
                             }
 
                             this.publishStateChange();
@@ -457,14 +477,26 @@ function TISensorTag() {
 
                             if (x) {
                                 this.state.gyroscopicPropulsion.x = x.toFixed(1);
+
+                                if (!this.state.gyroscopicPropulsion.x){
+                                    this.state.gyroscopicPropulsion.x = 0;
+                                }
                             }
 
                             if (y) {
                                 this.state.gyroscopicPropulsion.y = y.toFixed(1);
+
+                                if (!this.state.gyroscopicPropulsion.y){
+                                    this.state.gyroscopicPropulsion.y = 0;
+                                }
                             }
 
                             if (z) {
                                 this.state.gyroscopicPropulsion.z = z.toFixed(1);
+
+                                if (!this.state.gyroscopicPropulsion.z){
+                                    this.state.gyroscopicPropulsion.z = 0;
+                                }
                             }
 
                             this.publishStateChange();
@@ -503,14 +535,26 @@ function TISensorTag() {
 
                             if (x) {
                                 this.state.magneticFieldStrength.x = x.toFixed(1);
+
+                                if (!this.state.magneticFieldStrength.x){
+                                    this.state.magneticFieldStrength.x = 0;
+                                }
                             }
 
                             if (y) {
                                 this.state.magneticFieldStrength.y = y.toFixed(1);
+
+                                if (!this.state.magneticFieldStrength.y){
+                                    this.state.magneticFieldStrength.y = 0;
+                                }
                             }
 
                             if (z) {
                                 this.state.magneticFieldStrength.z = z.toFixed(1);
+
+                                if (!this.state.magneticFieldStrength.z){
+                                    this.state.magneticFieldStrength.z = 0;
+                                }
                             }
 
                             this.publishStateChange();
@@ -549,6 +593,10 @@ function TISensorTag() {
 
                             if (humidity) {
                                 this.state.humidity = humidity.toFixed(1);
+
+                                if (!this.state.humidity){
+                                    this.state.humidity = 0;
+                                }
                             }
 
                             this.publishStateChange();
@@ -563,6 +611,7 @@ function TISensorTag() {
                         }.bind(this));
 
 
+/*
                         setInterval(function() {
                             this.sensorTag.readHumidity(function (error, temperature, humidity){
                                 this.logDebug("Humidity read at " + humidity + " and temperature at " + temperature);
@@ -572,6 +621,7 @@ function TISensorTag() {
                                 }
                             }.bind(this));
                         }.bind(this), humidityInterval);
+*/
                     }.bind(this));
                 }
                 else {
