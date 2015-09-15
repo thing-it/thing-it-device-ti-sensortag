@@ -28,7 +28,7 @@ no further configuration is required.
 
 The UI depends on the settings of sensor quantities to be observed, e.g.
 
-<img src="./documentation/images/ui.png">
+<img src="./documentation/images/ti-sensortag-mobile-ui.png">
 
 
 
