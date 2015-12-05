@@ -29,7 +29,7 @@ npm install -g thing-it-node
  
 ### Initialization and Start of [thing-it-node] 
 
-The **[thing-it-device-philips-hue]** Plugin is installed with **[thing-it-node]**, hence there is no need to install it separately.
+The **[thing-it-device-ti-sensortag]** Plugin is installed with **[thing-it-node]**, hence there is no need to install it separately.
 
 The Plugin supports Autodiscovery, hence you only have to create a directory in which you intend to run the configuration, e.g.
  
@@ -79,5 +79,5 @@ After completing the above, you may be interested in
 [Jobs](https://www.thing-it.com/thing-it/#/documentationPanel/mobileClient/jobConfiguration) via your **[thing-it] Mobile App**.
 * Use [thing-it.com](https://www.thing-it.com) to safely connect your Node Box from everywhere, manage complex configurations, store and analyze historical data 
 and offer your configurations to others on the **[thing-it] Mesh Market**.
-* Explore other Device Plugins like [Texas Instruments Sensor Tag](https://www.npmjs.com/package/thing-it-device-ti-sensortag), [Plugwise Smart Switches](https://www.npmjs.com/package/thing-it-device-plugwise) and many more. For a full set of 
+* Explore other Device Plugins like [Philips Hue](https://www.npmjs.com/package/thing-it-device-philips-hue), [Plugwise Smart Switches](https://www.npmjs.com/package/thing-it-device-plugwise) and many more. For a full set of 
 Device Plugins search for **thing-it-device** on [npm](https://www.npmjs.com/). Or [write your own Plugins](https://github.com/marcgille/thing-it-node/wiki/Plugin-Development-Concepts).
