@@ -237,22 +237,23 @@ function TISensorTag() {
         };
 
         if (this.sensorTag) {
+            console.log("SensorTag " + this.sensorTag.uuid + " already associated, connecting.");
             this.connect();
-
             deferred.resolve();
         }
         else {
             if (!this.isSimulated()) {
+                console.log("SensorTag not simulated.");
                 this.started = true;
 
                 if (!SensorTag) {
                     SensorTag = require("sensortag");
-
-                    this.scan();
                 }
 
+                this.scan();
                 deferred.resolve();
             } else {
+                console.log("SensorTag simulated.");
                 this.simulationInterval = setInterval(function () {
                     this.state = {
                         acceleration: {
@@ -322,7 +323,7 @@ function TISensorTag() {
                 return;
             }
 
-            console.log("\nSensor Tag " + sensorTag.uuid + " found.");
+            console.log("\nSensor Tag " + sensorTag.uuid + " found, looking for " + this.configuration.uuid + ".");
 
             if (sensorTag.uuid === this.configuration.uuid) {
                 console.log("\nMatching Sensor Tag found.");
