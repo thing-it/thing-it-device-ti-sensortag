@@ -225,6 +225,7 @@ function TISensorTag() {
     TISensorTag.prototype.start = function () {
         var deferred = q.defer();
 
+/*
         this.state = {
             acceleration: {x: 0, y: 0, z: 0},
             barometricPressure: null,
@@ -234,6 +235,10 @@ function TISensorTag() {
             ambientTemperature: -273,
             magneticFieldStrength: {x: 0, y: 0, z: 0},
             luminousIntensity: 0
+        };
+*/
+
+        this.state = {
         };
 
         if (this.sensorTag) {
@@ -413,6 +418,8 @@ function TISensorTag() {
 
                 // Accelerometer
                 if (this.configuration.accelerometerEnabled) {
+                    this.state.acceleration = {};
+
                     this.sensorTag.enableAccelerometer(function () {
                         this.logDebug("Enabled accelerometer notifications.");
 
@@ -470,6 +477,8 @@ function TISensorTag() {
 
                 // Gyroscope
                 if (this.configuration.gyroscopeEnabled) {
+                    this.state.gyroscopicPropulsion = {};
+
                     this.sensorTag.enableGyroscope(function () {
                         this.logDebug("Enabled gyroscope notifications.");
 
@@ -528,6 +537,8 @@ function TISensorTag() {
 
                 // Magnetometer
                 if (this.configuration.magnetometerEnabled) {
+                    this.state.magneticFieldStrength = {};
+
                     this.sensorTag.enableMagnetometer(function () {
                         this.logDebug("Enabled magnetometer notifications.");
 

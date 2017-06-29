@@ -6,18 +6,18 @@ tiSensorTag.isSimulated = function () {
     return false;
 };
 tiSensorTag.configuration = {
-    uuid : "e461b0d0212e45ac971f1770c282f45e",
+    uuid : "53226467bb3045dcab2a4a793c175bbf",
     irTemperatureEnabled: false,
     irTemperatureNotificationInterval: 2500,
     ambientTemperatureEnabled: false,
     ambientTemperatureNotificationInterval: 2500,
-    gyroscopeEnabled: false,
+    gyroscopeEnabled: true,
     gyroscopeNotificationInterval: 2500,
     accelerometerEnabled: false,
     accelerometerNotificationInterval: 2499,
     magnetometerEnabled: false,
     magnetometerNotificationInterval: 2490,
-    humidityEnabled: true,
+    humidityEnabled: false,
     humidityNotificationInterval: 2500,
     barometricPressureEnabled: false,
     barometricPressureNotificationInterval: 2500,
