@@ -225,6 +225,7 @@ function TISensorTag() {
     TISensorTag.prototype.start = function () {
         var deferred = q.defer();
 
+/*
         this.state = {
             acceleration: {x: 0, y: 0, z: 0},
             barometricPressure: null,
@@ -235,24 +236,29 @@ function TISensorTag() {
             magneticFieldStrength: {x: 0, y: 0, z: 0},
             luminousIntensity: 0
         };
+*/
+
+        this.state = {
+        };
 
         if (this.sensorTag) {
+            console.log("SensorTag " + this.sensorTag.uuid + " already associated, connecting.");
             this.connect();
-
             deferred.resolve();
         }
         else {
             if (!this.isSimulated()) {
+                console.log("SensorTag not simulated.");
                 this.started = true;
 
                 if (!SensorTag) {
                     SensorTag = require("sensortag");
-
-                    this.scan();
                 }
 
+                this.scan();
                 deferred.resolve();
             } else {
+                console.log("SensorTag simulated.");
                 this.simulationInterval = setInterval(function () {
                     this.state = {
                         acceleration: {
@@ -322,7 +328,7 @@ function TISensorTag() {
                 return;
             }
 
-            console.log("\nSensor Tag " + sensorTag.uuid + " found.");
+            console.log("\nSensor Tag " + sensorTag.uuid + " found, looking for " + this.configuration.uuid + ".");
 
             if (sensorTag.uuid === this.configuration.uuid) {
                 console.log("\nMatching Sensor Tag found.");
@@ -412,6 +418,8 @@ function TISensorTag() {
 
                 // Accelerometer
                 if (this.configuration.accelerometerEnabled) {
+                    this.state.acceleration = {};
+
                     this.sensorTag.enableAccelerometer(function () {
                         this.logDebug("Enabled accelerometer notifications.");
 
@@ -469,6 +477,8 @@ function TISensorTag() {
 
                 // Gyroscope
                 if (this.configuration.gyroscopeEnabled) {
+                    this.state.gyroscopicPropulsion = {};
+
                     this.sensorTag.enableGyroscope(function () {
                         this.logDebug("Enabled gyroscope notifications.");
 
@@ -527,6 +537,8 @@ function TISensorTag() {
 
                 // Magnetometer
                 if (this.configuration.magnetometerEnabled) {
+                    this.state.magneticFieldStrength = {};
+
                     this.sensorTag.enableMagnetometer(function () {
                         this.logDebug("Enabled magnetometer notifications.");
 
