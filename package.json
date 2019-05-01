@@ -1,5 +1,5 @@
 {
-  "name": "thing-it-device-ti-sensortag",
+  "name": "@thing-it/device-ti-sensortag",
   "version": "0.2.5",
   "description": "[thing-it-node] Device Plugin for TI CC2541 and CC2650 SensorTag.",
   "authors": "Marc Gille, Klaus Berberich",
@@ -13,7 +13,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/marcgille/thing-it-device-ti-sensortag"
+    "url": "https://github.com/thing-it/thing-it-device-ti-sensortag"
+  },
+  "scripts": {
+    "postversion": "git push && git push --tags && npm publish"
   },
   "dependencies": {
     "noble": "^1.0.2",
