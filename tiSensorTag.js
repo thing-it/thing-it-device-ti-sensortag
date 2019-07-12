@@ -225,6 +225,11 @@ function TISensorTag() {
     TISensorTag.prototype.start = function () {
         var deferred = q.defer();
 
+        this.operationalState = {
+            status: 'PENDING',
+            message: 'Waiting for initialization...'
+          };
+          this.publishOperationalStateChange();
 /*
         this.state = {
             acceleration: {x: 0, y: 0, z: 0},
@@ -244,6 +249,13 @@ function TISensorTag() {
         if (this.sensorTag) {
             console.log("SensorTag " + this.sensorTag.uuid + " already associated, connecting.");
             this.connect();
+
+            this.operationalState = {
+                status: 'OK',
+                message: 'TI Sensor Tag successfully initialized'
+            }
+            this.publishOperationalStateChange();
+
             deferred.resolve();
         }
         else {
@@ -256,6 +268,13 @@ function TISensorTag() {
                 }
 
                 this.scan();
+
+                this.operationalState = {
+                    status: 'OK',
+                    message: 'TI Sensor Tag successfully initialized'
+                }
+                this.publishOperationalStateChange();
+
                 deferred.resolve();
             } else {
                 console.log("SensorTag simulated.");
@@ -286,6 +305,11 @@ function TISensorTag() {
                     this.publishStateChange();
                 }.bind(this), 1000);
 
+                this.operationalState = {
+                    status: 'OK',
+                    message: 'TI Sensor Tag successfully initialized'
+                }
+                this.publishOperationalStateChange();
                 deferred.resolve();
             }
         }
