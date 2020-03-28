@@ -201,9 +201,10 @@ function TISensorTagDiscovery() {
             SensorTag.discover(function (sensorTag) {
                 var tiSensorTag = new TISensorTag();
 
-                tiSensorTag.sensorTag = sensorTag;
+                tiSensorTag.configuration = this.defaultConfiguration;
                 tiSensorTag.uuid = sensorTag.uuid;
-            });
+                this.advertiseDevice(tiSensorTag);
+            }.bind(this));
         }
     };
 
@@ -343,18 +344,18 @@ function TISensorTag() {
      *
      */
     TISensorTag.prototype.scan = function () {
-        console.log("\tScanning for Sensor Tag " + this.configuration.uuid + " started.");
+        console.log("\tScanning for Sensor Tag " + this.uuid + " started.");
 
-        SensorTag.discover(function (sensorTag) {
+        SensorTag.discoverById(this.uuid, function (sensorTag) {
             if (!this.started) {
                 console.log("Skipping discovered SensorTag - Device stopped.");
 
                 return;
             }
 
-            console.log("\nSensor Tag " + sensorTag.uuid + " found, looking for " + this.configuration.uuid + ".");
+            console.log("\nSensor Tag " + sensorTag.uuid + " found, looking for " + this.uuid + ".");
 
-            if (sensorTag.uuid === this.configuration.uuid) {
+            if (sensorTag.uuid === this.uuid) {
                 console.log("\nMatching Sensor Tag found.");
 
                 this.sensorTag = sensorTag;
